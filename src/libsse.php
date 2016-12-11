@@ -112,9 +112,10 @@ class SSE {
 		//keep the script running
 		while(true){
 			if(SSEUtils::time_mod($start,$this->keep_alive_time) == 0){
-				//No updates needed, send a comment to keep the connection alive.
-				//From https://developer.mozilla.org/en-US/docs/Server-sent_events/Using_server-sent_events
-				echo ': '.sha1(mt_rand())."\n\n";
+				//No updates needed, send a ping to keep the connection alive.
+				//Send package as data so that it can be used for client side manual reconnect if needed
+				//See http://stackoverflow.com/questions/21831206/eventsource-permanent-auto-reconnection
+				echo 'data: '.time()."\n\n";
 			}
 			
 			//start to check for updates

@@ -20,7 +20,6 @@ require_once('data_mechnisms/apc.php');
 
 class SSE {
 	private $_handlers = array();
-	private $id = 0;//the event id
 	
 	//seconds to sleep after the data has been sent
 	//default: 0.5 seconds
@@ -122,8 +121,11 @@ class SSE {
 			foreach($this->_handlers as $event=>$handler){
 				if($handler->check()){//check if the data is avaliable
 					$data = $handler->update();//get the data
-					$this->id++;
-					SSEUtils::sseBlock($this->id,$event,$data);
+          // Using current time as the event id.
+          // A better solution would be to extract current time from the data.
+          // This avoids issues for the rare case in where the 'next' db update happens in the time period
+          // between this db update and executing 'time()'
+					SSEUtils::sseBlock(time(),$event,$data);
 					//make sure the data has been sent to the client
 					@ob_flush();
 					@flush();

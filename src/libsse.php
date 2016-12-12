@@ -20,7 +20,8 @@ require_once('data_mechnisms/apc.php');
 
 class SSE {
 	private $_handlers = array();
-	
+	private $id = 0;//the event id
+
 	//seconds to sleep after the data has been sent
 	//default: 0.5 seconds
 	public $sleep_time = 0.5;
@@ -114,21 +115,23 @@ class SSE {
 				//No updates needed, send a ping to keep the connection alive.
 				//Send package as data so that it can be used for client side manual reconnect if needed
 				//See http://stackoverflow.com/questions/21831206/eventsource-permanent-auto-reconnection
-        SSEUtils::sseBlock(time(),'ping','');
-        //make sure the data has been sent to the client
-        @ob_flush();
-        @flush();
+				$this->id = time();
+				SSEUtils::sseBlock($this->id,'ping','');
+				//make sure the data has been sent to the client
+				@ob_flush();
+				@flush();
 			}
 			
 			//start to check for updates
 			foreach($this->_handlers as $event=>$handler){
 				if($handler->check()){//check if the data is avaliable
 					$data = $handler->update();//get the data
-          // Using current time as the event id.
-          // A better solution would be to extract current time from the data.
-          // This avoids issues for the rare case in where the 'next' db update happens in the time period
-          // between this db update and executing 'time()'
-					SSEUtils::sseBlock(time(),$event,$data);
+					// Using current time as the event id.
+					// A better solution would be to extract current time from the data.
+					// This avoids issues for the rare case in where the 'next' db update happens in the time period
+					// between this db update and executing 'time()'
+					$this->id = time();
+					SSEUtils::sseBlock($this->id,$event,$data);
 					//make sure the data has been sent to the client
 					@ob_flush();
 					@flush();

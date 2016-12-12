@@ -114,7 +114,10 @@ class SSE {
 				//No updates needed, send a ping to keep the connection alive.
 				//Send package as data so that it can be used for client side manual reconnect if needed
 				//See http://stackoverflow.com/questions/21831206/eventsource-permanent-auto-reconnection
-				echo 'data: '.time()."\n\n";
+        SSEUtils::sseBlock(time(),'ping','');
+        //make sure the data has been sent to the client
+        @ob_flush();
+        @flush();
 			}
 			
 			//start to check for updates
